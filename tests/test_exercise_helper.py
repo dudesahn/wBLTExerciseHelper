@@ -3,11 +3,16 @@ import pytest
 
 
 def test_bmx_exercise_helper(
-    obmx, bmx, bmx_exercise_helper, weth, router, usdc, w_blt, receive_underlying
+    obmx,
+    bmx,
+    bmx_exercise_helper,
+    weth,
+    w_blt,
+    receive_underlying,
+    obmx_whale,
+    gauge,
 ):
     # exercise a small amount
-    obmx_whale = accounts.at("0xE02Fb5C70aF32F80Aa7F9E8775FE7F12550348ec", force=True)
-    gauge = Contract("0x1F7B5E65c09dF12742255BB8Fe26958f4B52F9bb")
     obmx_before = obmx.balanceOf(obmx_whale)
     weth_before = weth.balanceOf(obmx_whale)
     bmx_before = bmx.balanceOf(obmx_whale)
@@ -19,7 +24,7 @@ def test_bmx_exercise_helper(
     swap_slippage = 50
 
     obmx.approve(bmx_exercise_helper, 2**256 - 1, {"from": obmx_whale})
-    fee_before = weth.balanceOf("0x58761D6C6bF6c4bab96CaE125a2e5c8B1859b48a")
+    fee_before = weth.balanceOf(bmx_exercise_helper.feeAddress())
 
     # use our preset slippage and amount
     if receive_underlying:
@@ -50,11 +55,10 @@ def test_bmx_exercise_helper(
         profit = weth.balanceOf(obmx_whale) - weth_before
 
     assert obmx.balanceOf(obmx_whale) == obmx_before - to_exercise
-    fees = weth.balanceOf("0x58761D6C6bF6c4bab96CaE125a2e5c8B1859b48a") - fee_before
+    fees = weth.balanceOf(bmx_exercise_helper.feeAddress()) - fee_before
 
     assert bmx.balanceOf(bmx_exercise_helper) == 0
     assert weth.balanceOf(bmx_exercise_helper) == 0
-    assert usdc.balanceOf(bmx_exercise_helper) == 0
     assert w_blt.balanceOf(bmx_exercise_helper) == 0
     assert obmx.balanceOf(bmx_exercise_helper) == 0
     assert gauge.balanceOf(bmx_exercise_helper) == 0
@@ -87,15 +91,13 @@ def test_bmx_exercise_helper(
 
 
 def test_bmx_exercise_helper_lp(
-    obmx, bmx, bmx_exercise_helper, weth, router, usdc, w_blt, tests_using_tenderly
+    obmx, bmx, bmx_exercise_helper, weth, w_blt, tests_using_tenderly, obmx_whale, gauge
 ):
     # exerciseToLp for wBLT helper crashes ganche, rip
     if not tests_using_tenderly:
         return
 
     # exercise a small amount
-    obmx_whale = accounts.at("0xE02Fb5C70aF32F80Aa7F9E8775FE7F12550348ec", force=True)
-    gauge = Contract("0x1F7B5E65c09dF12742255BB8Fe26958f4B52F9bb")
     obmx_before = obmx.balanceOf(obmx_whale)
     weth_before = weth.balanceOf(obmx_whale)
     bmx_before = bmx.balanceOf(obmx_whale)
@@ -115,7 +117,7 @@ def test_bmx_exercise_helper_lp(
     # to_exercise = 3_000e18. percent_to_lp =  500 = 1.26845%, 701 = , 751 = , 755 = 1.23482%
 
     obmx.approve(bmx_exercise_helper, 2**256 - 1, {"from": obmx_whale})
-    fee_before = weth.balanceOf("0x58761D6C6bF6c4bab96CaE125a2e5c8B1859b48a")
+    fee_before = weth.balanceOf(bmx_exercise_helper.feeAddress())
 
     # first check exercising our LP
     output = bmx_exercise_helper.quoteExerciseLp(
@@ -142,11 +144,10 @@ def test_bmx_exercise_helper_lp(
 
     assert obmx.balanceOf(obmx_whale) == obmx_before - to_exercise
 
-    fees = weth.balanceOf("0x58761D6C6bF6c4bab96CaE125a2e5c8B1859b48a") - fee_before
+    fees = weth.balanceOf(bmx_exercise_helper.feeAddress()) - fee_before
 
     assert bmx.balanceOf(bmx_exercise_helper) == 0
     assert weth.balanceOf(bmx_exercise_helper) == 0
-    assert usdc.balanceOf(bmx_exercise_helper) == 0
     assert w_blt.balanceOf(bmx_exercise_helper) == 0
     assert obmx.balanceOf(bmx_exercise_helper) == 0
 
@@ -170,15 +171,21 @@ def test_bmx_exercise_helper_lp(
 
 
 def test_bmx_exercise_helper_lp_weird(
-    obmx, bmx, bmx_exercise_helper, weth, router, usdc, w_blt, tests_using_tenderly
+    obmx,
+    bmx,
+    bmx_exercise_helper,
+    weth,
+    router,
+    w_blt,
+    tests_using_tenderly,
+    obmx_whale,
+    gauge,
 ):
     # we use tx.return_value here, and tenderly doesn't like that
     if tests_using_tenderly:
         return
 
     # exercise a small amount
-    obmx_whale = accounts.at("0xE02Fb5C70aF32F80Aa7F9E8775FE7F12550348ec", force=True)
-    gauge = Contract("0x1F7B5E65c09dF12742255BB8Fe26958f4B52F9bb")
     obmx_before = obmx.balanceOf(obmx_whale)
     weth_before = weth.balanceOf(obmx_whale)
     bmx_before = bmx.balanceOf(obmx_whale)

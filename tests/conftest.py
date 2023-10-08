@@ -10,7 +10,7 @@ def isolate(fn_isolation):
 
 
 # set this for if we want to use tenderly or not; mostly helpful because with brownie.reverts fails in tenderly forks.
-use_tenderly = True
+use_tenderly = False
 
 # use this to set what chain we use. 1 for ETH, 250 for fantom, 10 optimism, 42161 arbitrum, 8453 base
 chain_used = 8453
@@ -72,70 +72,67 @@ def receive_underlying(request):
     yield request.param
 
 
-if chain_used == 8453:
-    # use these for our BLT router testing
-    @pytest.fixture(scope="function")
-    def router():
-        router = Contract("0x70FfF9B84788566065f1dFD8968Fb72F798b9aE5")  # v22, testing
-        yield router
+@pytest.fixture(scope="session")
+def router():
+    router = Contract("0x70FfF9B84788566065f1dFD8968Fb72F798b9aE5")  # v22, testing
+    yield router
 
-    @pytest.fixture(scope="session")
-    def screamsh():
-        yield accounts.at("0x89955a99552F11487FFdc054a6875DF9446B2902", force=True)
 
-    @pytest.fixture(scope="session")
-    def w_blt():
-        yield Contract("0x4E74D4Db6c0726ccded4656d0BCE448876BB4C7A")
+@pytest.fixture(scope="session")
+def gauge():
+    yield Contract("0x1F7B5E65c09dF12742255BB8Fe26958f4B52F9bb")  # wBLT-BMX
 
-    @pytest.fixture(scope="session")
-    def gauge():
-        yield Contract("0x1F7B5E65c09dF12742255BB8Fe26958f4B52F9bb")
 
-    @pytest.fixture(scope="session")
-    def weth():
-        yield Contract("0x4200000000000000000000000000000000000006")
+@pytest.fixture(scope="session")
+def screamsh():
+    yield accounts.at("0x89955a99552F11487FFdc054a6875DF9446B2902", force=True)
 
-    @pytest.fixture(scope="session")
-    def bmx():
-        yield Contract("0x548f93779fBC992010C07467cBaf329DD5F059B7")
 
-    @pytest.fixture(scope="session")
-    def factory():
-        yield "0xe21Aac7F113Bd5DC2389e4d8a8db854a87fD6951"
+@pytest.fixture(scope="session")
+def obmx_whale():
+    yield accounts.at("0xE02Fb5C70aF32F80Aa7F9E8775FE7F12550348ec", force=True)
 
-    @pytest.fixture(scope="session")
-    def obmx():
-        yield Contract("0x3Ff7AB26F2dfD482C40bDaDfC0e88D01BFf79713")
 
-    @pytest.fixture(scope="session")
-    def usdc():
-        yield Contract("0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA")
+@pytest.fixture(scope="session")
+def w_blt():
+    yield Contract("0x4E74D4Db6c0726ccded4656d0BCE448876BB4C7A")
 
-    # route to swap from wBLT to WETH
-    @pytest.fixture(scope="session")
-    def wblt_route(w_blt, weth):
-        wblt_route = [
-            (w_blt.address, weth.address, False),
-        ]
-        yield wblt_route
 
-    # route to swap from WETH to wBLT
-    @pytest.fixture(scope="session")
-    def weth_route(w_blt, weth):
-        weth_route = [
-            (weth.address, w_blt.address, False),
-        ]
-        yield weth_route
+@pytest.fixture(scope="session")
+def weth():
+    yield Contract("0x4200000000000000000000000000000000000006")
 
-    # our dump helper
-    @pytest.fixture(scope="function")
-    def bmx_exercise_helper(
-        wBLTExerciseHelper, screamsh, router, wblt_route, weth_route
-    ):
-        #         bmx_exercise_helper = wBLTExerciseHelper.at(
-        #             "0x99413e382629be72F89D80CCEEF40Fe80CF3934f"
-        #         )
-        bmx_exercise_helper = screamsh.deploy(
-            wBLTExerciseHelper, wblt_route, weth_route
-        )
-        yield bmx_exercise_helper
+
+@pytest.fixture(scope="session")
+def bmx():
+    yield Contract("0x548f93779fBC992010C07467cBaf329DD5F059B7")
+
+
+@pytest.fixture(scope="session")
+def obmx():
+    yield Contract("0x3Ff7AB26F2dfD482C40bDaDfC0e88D01BFf79713")
+
+
+# route to swap from wBLT to WETH
+@pytest.fixture(scope="session")
+def wblt_route(w_blt, weth):
+    wblt_route = [
+        (w_blt.address, weth.address, False),
+    ]
+    yield wblt_route
+
+
+# route to swap from WETH to wBLT
+@pytest.fixture(scope="session")
+def weth_route(w_blt, weth):
+    weth_route = [
+        (weth.address, w_blt.address, False),
+    ]
+    yield weth_route
+
+
+# our dump helper
+@pytest.fixture(scope="function")
+def bmx_exercise_helper(wBLTExerciseHelper, screamsh, router, wblt_route, weth_route):
+    bmx_exercise_helper = screamsh.deploy(wBLTExerciseHelper, wblt_route, weth_route)
+    yield bmx_exercise_helper
