@@ -109,8 +109,8 @@ interface IRouter {
 
 /**
  * @title wBLT Exercise Helper
- * @notice This contract easily converts oTokens paired with wBLT
- *  to WETH using flash loans.
+ * @notice This contract easily converts oTokens that are paired with wBLT
+ *  (such as BMX) to WETH, underlying, or underlying-wBLT LP token using flash loans.
  */
 
 contract wBLTExerciseHelper is Ownable2Step {
