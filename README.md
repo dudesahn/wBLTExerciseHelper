@@ -31,8 +31,8 @@ brownie gui
 ```
 
 Note that ganache crashes when trying `exerciseToLp()`, so this test will only run using tenderly. Additionally, to
-properly test both branches of our WETH balance checks in `exercise()` and `exerciseToLp()`, the tests note
-that it is easiest to adjust the WETH threshold values on the specified lines. With these adjustments, all functions,
+properly test both branches of our WETH, underlying, & wBLT balance checks in `exercise()` and `exerciseToLp()`, the tests note
+that it is easiest to adjust the threshold values as outlined in `tracking.txt`. With these adjustments, all functions,
 with the exception of `_safeTransfer`, `_safeTransferFrom`, and `getAmountIn` are (theoretically) 100% covered.
 
 ### Test Results

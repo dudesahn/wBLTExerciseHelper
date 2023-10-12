@@ -1,0 +1,404 @@
+#######  🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 ROUND 1️⃣ 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 #######
+#######  These values represent the cutoff values (1e15, 1e12) that are present in our exercise functions: LP: NORMAL / NORMAL, NON-LP: NORMAL / NORMAL, NORMAL
+#######  We can adjust these values to either absurdly high or zero (though zero rarely achieves different outcome than the default values) to test different branches of the functions
+
+✅ receive ZERO underlying from WETH exercise (this should always be true)
+✅ receive wBLT from WETH exercise
+
+✅ receive ZERO wBLT from underlying exercise
+✅ receive ZERO WETH from underlying exercise
+
+✅ receive wBLT from LP exercise
+✅ receive ZERO underlying from LP exercise
+✅ receive ZERO WETH from LP exercise
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_underlying-buy_underlying] RUNNING
+Result w/ zero slippage {'wethNeeded': 300007430588220239, 'withinSlippageTolerance': True, 'realProfit': 260065761286295131100, 'expectedProfit': 117500000000000000000, 'profitSlippage': 0}
+Slippage (manually calculated): -121.33%
+
+🥟 Dumped 1,000.00 oBMX for 260.43333 BMX 👻
+Received 0.0 wBLT
+Received 0.0 WETH
+
+🤑 Took 0.001016302 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_underlying-buy_underlying] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_underlying-do_nothing] RUNNING
+Result w/ zero slippage {'wethNeeded': 307114540105829637, 'withinSlippageTolerance': False, 'realProfit': 36442106197091834527, 'expectedProfit': 117500000000000000000, 'profitSlippage': 689854415343899281}
+Slippage (manually calculated): 68.99%
+
+🥟 Dumped 1,000.00 oBMX for 36.92076 BMX 👻
+Received 0.0 wBLT
+Received 0.0 WETH
+
+🤑 Took 0.000799173 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_underlying-do_nothing] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_weth-buy_underlying] RUNNING
+Result w/ zero slippage {'wethNeeded': 300007411183745157, 'withinSlippageTolerance': True, 'realProfit': 105496926569007132, 'expectedProfit': 39893799926678332, 'profitSlippage': 0}
+Slippage (manually calculated): -164.44%
+
+🥟 Dumped 1,000.00 oBMX for 0.10550 WETH 👻
+Received 1.252e-15 wBLT
+Received 0.0 BMX
+
+🤑 Took 0.001016302 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_weth-buy_underlying] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_weth-do_nothing] RUNNING
+Result w/ zero slippage {'wethNeeded': 307114540105829637, 'withinSlippageTolerance': False, 'realProfit': 11755448917015915, 'expectedProfit': 41080082564157607, 'profitSlippage': 713840669656478486}
+Slippage (manually calculated): 71.38%
+
+🥟 Dumped 1,000.00 oBMX for 0.01176 WETH 👻
+Received 1.484e-15 wBLT
+Received 0.0 BMX
+
+🤑 Took 0.000799173 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_weth-do_nothing] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp[buy_underlying] RUNNING
+
+LP view output: {'withinSlippageTolerance': True, 'lpAmountOut': 11913798158454690950, 'wBLTOut': 232833802766935868827, 'profitSlippage': 0}
+Slippage: 0.0
+Estimated LP Out: 11.913798158454691
+Estimated Extra wBLT: 232.8338027669359
+LP % slippage: 0.71050%
+
+Received 0.0 WETH
+Received 230.74129361806607 wBLT
+Received 0.0 BMX
+LP Received: 11.829150204172644
+
+🤑 Took 0.001505706 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp[buy_underlying] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp[do_nothing] RUNNING
+
+LP view output: {'withinSlippageTolerance': True, 'lpAmountOut': 10561877186315618554, 'wBLTOut': 16717276562118768059, 'profitSlippage': 689173261516748349}
+Slippage: 0.6891732615167483
+Estimated LP Out: 10.561877186315618
+Estimated Extra wBLT: 16.71727656211877
+LP % slippage: 0.63039%
+
+Received 0.0 WETH
+Received 16.902048851794255 wBLT
+Received 0.0 BMX
+LP Received: 10.495296463408168
+
+🤑 Took 0.001184329 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp[do_nothing] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp_weird RUNNING
+
+LP view output: {'withinSlippageTolerance': True, 'lpAmountOut': 7041251457543745702, 'wBLTOut': 11105833197055491002, 'profitSlippage': 689868460944489502}
+Slippage: 0.6898684609444895
+Estimated LP Out: 7.041251457543746
+Estimated Extra wBLT: 11.10583319705549
+Simulation: {'paymentAmount': 1900438991747953705, 'paymentAmountToAddLiquidity': 5006202455305839191} 6906641447053792896
+Real thing: None
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp_weird PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper_reverts RUNNING
+
+🚨🚨 Can't use Anvil 🔨 when testing revert strings on write functions 🚨🚨
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper_reverts PASSED
+
+#######  🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 ROUND 2️⃣ 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 #######
+#######  LP: HIGH / ZERO, NON-LP: HIGH / ZERO, NORMAL (REVERTS IF ZERO)
+
+✅ receive WETH from underlying exercise
+
+✅ receive WETH from LP exercise
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_underlying-buy_underlying] RUNNING
+Result w/ zero slippage {'wethNeeded': 300545982112268642, 'withinSlippageTolerance': True, 'realProfit': 260010547251816887665, 'expectedProfit': 117500000000000000000, 'profitSlippage': 0}
+Slippage (manually calculated): -121.29%
+
+🥟 Dumped 1,000.00 oBMX for 260.01057 BMX 👻
+Received 0.0 wBLT
+Received 0.000150698371612319 WETH
+
+🤑 Took 0.001018050 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_underlying-buy_underlying] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_underlying-do_nothing] RUNNING
+Result w/ zero slippage {'wethNeeded': 300545974958255919, 'withinSlippageTolerance': False, 'realProfit': 58700975126732476042, 'expectedProfit': 117500000000000000000, 'profitSlippage': 500417232963978928}
+Slippage (manually calculated): 50.04%
+
+🥟 Dumped 1,000.00 oBMX for 58.70101 BMX 👻
+Received 0.0 wBLT
+Received 0.000150521381547551 WETH
+
+🤑 Took 0.000800547 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_underlying-do_nothing] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_weth-buy_underlying] RUNNING
+Result w/ zero slippage {'wethNeeded': 300545982112268642, 'withinSlippageTolerance': True, 'realProfit': 105655983218519189, 'expectedProfit': 39965492976886333, 'profitSlippage': 0}
+Slippage (manually calculated): -164.37%
+
+🥟 Dumped 1,000.00 oBMX for 0.10566 WETH 👻
+Received 1.46e-15 wBLT
+Received 0.0 BMX
+
+🤑 Took 0.001018050 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_weth-buy_underlying] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_weth-do_nothing] RUNNING
+Result w/ zero slippage {'wethNeeded': 300545974958255919, 'withinSlippageTolerance': False, 'realProfit': 18872400284326389, 'expectedProfit': 40182994733389784, 'profitSlippage': 530338631813210842}
+Slippage (manually calculated): 53.03%
+
+🥟 Dumped 1,000.00 oBMX for 0.01887 WETH 👻
+Received 1.349e-15 wBLT
+Received 0.0 BMX
+
+🤑 Took 0.000800547 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_weth-do_nothing] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp[buy_underlying] RUNNING
+
+LP view output: {'withinSlippageTolerance': True, 'lpAmountOut': 11913769591438782265, 'wBLTOut': 232780559508714518198, 'profitSlippage': 0}
+Slippage: 0.0
+Estimated LP Out: 11.913769591438783
+Estimated Extra wBLT: 232.78055950871453
+LP % slippage: 0.71050%
+
+Received 0.000222940822774378 WETH
+Received 230.34368088576605 wBLT
+Received 0.0 BMX
+LP Received: 11.82912204165345
+
+🤑 Took 0.001508296 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp[buy_underlying] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp[do_nothing] RUNNING
+
+LP view output: {'withinSlippageTolerance': True, 'lpAmountOut': 10561848619299709870, 'wBLTOut': 33310003241044821020, 'profitSlippage': 499383709335055558}
+Slippage: 0.49938370933505555
+Estimated LP Out: 10.56184861929971
+Estimated Extra wBLT: 33.31000324104482
+LP % slippage: 0.63039%
+
+Received 0.000222630233735787 WETH
+Received 32.888447717569335 wBLT
+Received 0.0 BMX
+LP Received: 10.49526825542219
+
+🤑 Took 0.001186365 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp[do_nothing] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp_weird RUNNING
+
+LP view output: {'withinSlippageTolerance': True, 'lpAmountOut': 7041232412866473247, 'wBLTOut': 22149000309307963769, 'profitSlippage': 500438545536841057}
+Slippage: 0.5004385455368411
+Estimated LP Out: 7.041232412866473
+Estimated Extra wBLT: 22.149000309307965
+Simulation: {'paymentAmount': 1856522221977523258, 'paymentAmountToAddLiquidity': 5006175374500172677} 6862697596477695935
+Real thing: None
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp_weird PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper_reverts RUNNING
+
+🚨🚨 Can't use Anvil 🔨 when testing revert strings on write functions 🚨🚨
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper_reverts PASSED
+
+#######  🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 ROUND 3️⃣ 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 #######
+#######  LP: NORMAL / NORMAL (reverts for LP if both HIGH), NON-LP: HIGH / HIGH, HIGH. 
+- This is essentially making sure we never convert leftover amounts to anything else.
+- No matter what, there is never underlying leftover when receiving WETH (makes sense)
+
+✅ receive wBLT from underlying exercise
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_underlying-buy_underlying] RUNNING
+Result w/ zero slippage {'wethNeeded': 300583066985749393, 'withinSlippageTolerance': True, 'realProfit': 259919290712277015422, 'expectedProfit': 117500000000000000000, 'profitSlippage': 0}
+Slippage (manually calculated): -121.21%
+
+🥟 Dumped 1,000.00 oBMX for 259.91936 BMX 👻
+Received 1.206e-15 wBLT
+Received 0.000150717023881421 WETH
+
+🤑 Took 0.001018051 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_underlying-buy_underlying] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_underlying-do_nothing] RUNNING
+Result w/ zero slippage {'wethNeeded': 300583059830893436, 'withinSlippageTolerance': False, 'realProfit': 58651441191017606699, 'expectedProfit': 117500000000000000000, 'profitSlippage': 500838798374318241}
+Slippage (manually calculated): 50.08%
+
+🥟 Dumped 1,000.00 oBMX for 58.65153 BMX 👻
+Received 1.237e-15 wBLT
+Received 0.000150540089872586 WETH
+
+🤑 Took 0.000800604 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_underlying-do_nothing] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_weth-buy_underlying] RUNNING
+Result w/ zero slippage {'wethNeeded': 300583066985749393, 'withinSlippageTolerance': True, 'realProfit': 105619111630913382, 'expectedProfit': 39970549470537188, 'profitSlippage': 0}
+Slippage (manually calculated): -164.24%
+
+🥟 Dumped 1,000.00 oBMX for 0.10562 WETH 👻
+Received 1.206e-15 wBLT
+Received 0.0 BMX
+
+🤑 Took 0.001018051 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_weth-buy_underlying] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_weth-do_nothing] RUNNING
+Result w/ zero slippage {'wethNeeded': 300583059830893436, 'withinSlippageTolerance': False, 'realProfit': 18857966752623011, 'expectedProfit': 40187994991198687, 'profitSlippage': 530756218200162203}
+Slippage (manually calculated): 53.08%
+
+🥟 Dumped 1,000.00 oBMX for 0.01886 WETH 👻
+Received 7.11e-16 wBLT
+Received 0.0 BMX
+
+🤑 Took 0.000800604 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_weth-do_nothing] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp[buy_underlying] RUNNING
+
+LP view output: {'withinSlippageTolerance': True, 'lpAmountOut': 11913348297386199601, 'wBLTOut': 232678574317249961473, 'profitSlippage': 0}
+Slippage: 0.0
+Estimated LP Out: 11.913348297386198
+Estimated Extra wBLT: 232.67857431724997
+LP % slippage: 0.71026%
+
+Received 0.0 WETH
+Received 230.58813193597567 wBLT
+Received 0.0 BMX
+LP Received: 11.828732902030596
+
+🤑 Took 0.001508298 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp[buy_underlying] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp[do_nothing] RUNNING
+
+LP view output: {'withinSlippageTolerance': True, 'lpAmountOut': 10561848619299709870, 'wBLTOut': 33273657523445373009, 'profitSlippage': 499801207288871814}
+Slippage: 0.4998012072888718
+Estimated LP Out: 10.56184861929971
+Estimated Extra wBLT: 33.27365752344537
+LP % slippage: 0.63019%
+
+Received 0.0 WETH
+Received 33.197000332311546 wBLT
+Received 0.0 BMX
+LP Received: 10.49528887285773
+
+🤑 Took 0.001186450 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp[do_nothing] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp_weird RUNNING
+
+LP view output: {'withinSlippageTolerance': True, 'lpAmountOut': 7041232412866473247, 'wBLTOut': 22124521620178305469, 'profitSlippage': 500860194834251934}
+Slippage: 0.5008601948342519
+Estimated LP Out: 7.041232412866473
+Estimated Extra wBLT: 22.124521620178307
+Simulation: {'paymentAmount': 1856522221977523258, 'paymentAmountToAddLiquidity': 5006175374500172677} 6862697596477695935
+Real thing: None
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp_weird PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper_reverts RUNNING
+
+🚨🚨 Can't use Anvil 🔨 when testing revert strings on write functions 🚨🚨
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper_reverts PASSED
+
+#######  🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 ROUND 4️⃣ 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 #######
+#######  LP: HIGH / NORMAL (reverts for LP if both HIGH), NON-LP: HIGH / HIGH, HIGH. 
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_underlying-buy_underlying] RUNNING
+Result w/ zero slippage {'wethNeeded': 294841289276430526, 'withinSlippageTolerance': True, 'realProfit': 274371982778167523903, 'expectedProfit': 117500000000000000000, 'profitSlippage': 0}
+Slippage (manually calculated): -133.51%
+
+🥟 Dumped 1,000.00 oBMX for 274.37207 BMX 👻
+Received 1.1e-17 wBLT
+Received 0.000147858201967968 WETH
+
+🤑 Took 0.001018491 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_underlying-buy_underlying] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_underlying-do_nothing] RUNNING
+Result w/ zero slippage {'wethNeeded': 300724495704418665, 'withinSlippageTolerance': False, 'realProfit': 58615860380538306432, 'expectedProfit': 117500000000000000000, 'profitSlippage': 501141613782652712}
+Slippage (manually calculated): 50.11%
+
+🥟 Dumped 1,000.00 oBMX for 58.61598 BMX 👻
+Received 7.27e-16 wBLT
+Received 0.000150610886906358 WETH
+
+🤑 Took 0.000800951 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_underlying-do_nothing] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_weth-buy_underlying] RUNNING
+Result w/ zero slippage {'wethNeeded': 294841289282125797, 'withinSlippageTolerance': True, 'realProfit': 111536683631680113, 'expectedProfit': 39187139196468540, 'profitSlippage': 0}
+Slippage (manually calculated): -184.63%
+
+🥟 Dumped 1,000.00 oBMX for 0.11154 WETH 👻
+Received 9.66e-16 wBLT
+Received 0.0 BMX
+
+🤑 Took 0.001018491 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_weth-buy_underlying] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_weth-do_nothing] RUNNING
+Result w/ zero slippage {'wethNeeded': 300724495704418665, 'withinSlippageTolerance': False, 'realProfit': 18854777088029820, 'expectedProfit': 40206935219498209, 'profitSlippage': 531056595458032736}
+Slippage (manually calculated): 53.11%
+
+🥟 Dumped 1,000.00 oBMX for 0.01885 WETH 👻
+Received 8.49e-16 wBLT
+Received 0.0 BMX
+
+🤑 Took 0.000800951 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper[receive_weth-do_nothing] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp[buy_underlying] RUNNING
+
+LP view output: {'withinSlippageTolerance': True, 'lpAmountOut': 11913348297386199601, 'wBLTOut': 246334796893959221709, 'profitSlippage': 0}
+Slippage: 0.0
+Estimated LP Out: 11.913348297386198
+Estimated Extra wBLT: 246.33479689395924
+LP % slippage: 0.71026%
+
+Received 0.000218746630846669 WETH
+Received 243.80969794918062 wBLT
+Received 0.0 BMX
+LP Received: 11.828732902030596
+
+🤑 Took 0.001508951 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp[buy_underlying] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp[do_nothing] RUNNING
+
+LP view output: {'withinSlippageTolerance': True, 'lpAmountOut': 10561848619299709870, 'wBLTOut': 33247244188123250593, 'profitSlippage': 500104570947867185}
+Slippage: 0.5001045709478672
+Estimated LP Out: 10.56184861929971
+Estimated Extra wBLT: 33.247244188123254
+LP % slippage: 0.63019%
+
+Received 0.000222762711117356 WETH
+Received 32.88108951366981 wBLT
+Received 0.0 BMX
+LP Received: 10.49528887285773
+
+🤑 Took 0.001186964 WETH in fees
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp[do_nothing] PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp_weird RUNNING
+
+LP view output: {'withinSlippageTolerance': True, 'lpAmountOut': 7041232412866473247, 'wBLTOut': 22106940825883227154, 'profitSlippage': 501162998935354035}
+Slippage: 0.5011629989353541
+Estimated LP Out: 7.041232412866473
+Estimated Extra wBLT: 22.106940825883225
+Simulation: {'paymentAmount': 1856522221977523258, 'paymentAmountToAddLiquidity': 5006175374500172677} 6862697596477695935
+Real thing: None
+tests/test_exercise_helper.py::test_bmx_exercise_helper_lp_weird PASSED
+tests/test_exercise_helper.py::test_bmx_exercise_helper_reverts RUNNING
+
+🚨🚨 Can't use Anvil 🔨 when testing revert strings on write functions 🚨🚨
+
+tests/test_exercise_helper.py::test_bmx_exercise_helper_reverts PASSED
+
+#######  🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 ROUND 5️⃣ 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 #######
+#######  LP: NORMAL / HIGH (reverts for LP if both HIGH), NON-LP: HIGH / HIGH, HIGH. 
+- Reverts if LP underlying is HIGH, as we route through underlying to generate wBLT. 
+
+#######  🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 ROUND 4️⃣ 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 #######
+#######  LP: ZERO / ZERO, NON-LP: ZERO / ZERO, NORMAL (zero breaks things)
+❌ receive ZERO wBLT from WETH exercise (impossible, trying to swap dust will revert)
+❌ receive underlying from LP exercise (impossible, as we use the underlying to generate wBLT here)
+❌ receive ZERO wBLT from LP exercise (impossible, we choose to receive leftover assets as wBLT)
