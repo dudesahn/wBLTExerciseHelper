@@ -1,7 +1,7 @@
 # use Ganache's forked mainnet mode as the default network (mainnet-fork)
 # NOTE: You don't *have* to do this, but it is often helpful for testing
 networks:
-  default: base-dev-fork
+  default: base-anvil-fork
 
 # automatically fetch contract sources from Etherscan
 autofetch_sources: True
@@ -21,9 +21,5 @@ compiler:
 
 reports:
   exclude_contracts:
-    - Math
-    - Vault
-    - Ownable
-    - Address
-    - BaseStrategy
-    - SafeERC20
+    - Ownable2Step
+    - ERC20

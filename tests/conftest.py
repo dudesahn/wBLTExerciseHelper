@@ -22,6 +22,22 @@ def tests_using_tenderly():
     yield yes_or_no
 
 
+# useful because it doesn't crash when sometimes ganache does, "works" in coverage testing but then doesn't actually write any data lol
+# if we're using anvil, make sure to use the correct network (base-anvil-fork vs base-dev-fork)
+use_anvil = True
+
+
+@pytest.fixture(scope="session")
+def tests_using_anvil():
+    yes_or_no = use_anvil
+    yield yes_or_no
+
+
+@pytest.fixture(scope="session", autouse=use_anvil)
+def fun_with_anvil(web3):
+    web3.manager.request_blocking("anvil_setNextBlockBaseFeePerGas", ["0x0"])
+
+
 ################################################## TENDERLY DEBUGGING ##################################################
 
 # change autouse to True if we want to use this fork to help debug tests
@@ -59,7 +75,7 @@ def tenderly_fork(web3, chain):
 
 ################################################ UPDATE THINGS BELOW HERE ################################################
 
-
+# use this to test both exercising for WETH and underlying
 @pytest.fixture(
     params=[
         True,
@@ -72,10 +88,29 @@ def receive_underlying(request):
     yield request.param
 
 
+# use this to simulate positive slippage (times when spot price is higher than TWAP price)
+@pytest.fixture(
+    params=[
+        True,
+        False,
+    ],
+    ids=["buy_underlying", "do_nothing"],
+    scope="function",
+)
+def buy_underlying(request):
+    yield request.param
+
+
 @pytest.fixture(scope="session")
 def router():
     router = Contract("0x70FfF9B84788566065f1dFD8968Fb72F798b9aE5")  # v22, testing
     yield router
+
+
+@pytest.fixture(scope="session")
+def bvm_router():
+    bvm_router = Contract("0x70FfF9B84788566065f1dFD8968Fb72F798b9aE5")
+    yield bvm_router
 
 
 @pytest.fixture(scope="session")
@@ -91,6 +126,16 @@ def screamsh():
 @pytest.fixture(scope="session")
 def obmx_whale():
     yield accounts.at("0xE02Fb5C70aF32F80Aa7F9E8775FE7F12550348ec", force=True)
+
+
+@pytest.fixture(scope="session")
+def bmx_whale():
+    yield accounts.at("0x37fda9Da0f51dF81a5B316C9Ab8410f9F8175F5b", force=True)
+
+
+@pytest.fixture(scope="session")
+def w_blt_whale():
+    yield accounts.at("0x457bD84827b55434078cF7F67aE64bB8f7F7c6b0", force=True)
 
 
 @pytest.fixture(scope="session")

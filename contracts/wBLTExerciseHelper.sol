@@ -6,33 +6,31 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 interface IoToken is IERC20 {
     function exercise(
-        uint256 _amount,
-        uint256 _maxPaymentAmount,
-        address _recipient
+        uint256 amount,
+        uint256 maxPaymentAmount,
+        address recipient
     ) external returns (uint256);
 
-    function getDiscountedPrice(
-        uint256 _amount
-    ) external view returns (uint256);
+    function getDiscountedPrice(uint256 amount) external view returns (uint256);
 
     function discount() external view returns (uint256);
 
     function underlyingToken() external view returns (address);
 
     function getPaymentTokenAmountForExerciseLp(
-        uint256 _amount,
-        uint256 _discount
+        uint256 amount,
+        uint256 discount
     )
         external
         view
         returns (uint256 paymentAmount, uint256 paymentAmountToAddLiquidity);
 
     function exerciseLp(
-        uint256 _amount,
-        uint256 _maxPaymentAmount,
-        address _recipient,
-        uint256 _discount,
-        uint256 _deadline
+        uint256 amount,
+        uint256 maxPaymentAmount,
+        address recipient,
+        uint256 discount,
+        uint256 deadline
     ) external returns (uint256, uint256);
 }
 
@@ -46,7 +44,7 @@ interface IBalancer {
 }
 
 interface IRouter {
-    struct route {
+    struct Route {
         address from;
         address to;
         bool stable;
@@ -56,27 +54,30 @@ interface IRouter {
         address tokenA,
         address tokenB,
         bool stable
-    ) external view returns (uint reserve0, uint reserve1);
+    ) external view returns (uint256 reserve0, uint256 reserve1);
 
     function getAmountOut(
-        uint amountIn,
+        uint256 amountIn,
         address tokenIn,
         address tokenOut,
         bool stable
-    ) external view returns (uint amount);
+    ) external view returns (uint256 amount);
 
     function getAmountsOut(
-        uint amountIn,
-        route[] memory routes
-    ) external view returns (uint[] memory amounts);
+        uint256 amountIn,
+        Route[] memory routes
+    ) external view returns (uint256[] memory amounts);
 
     function quoteAddLiquidity(
         address tokenA,
         address tokenB,
         bool stable,
-        uint amountADesired,
-        uint amountBDesired
-    ) external view returns (uint amountA, uint amountB, uint liquidity);
+        uint256 amountADesired,
+        uint256 amountBDesired
+    )
+        external
+        view
+        returns (uint256 amountA, uint256 amountB, uint256 liquidity);
 
     function quoteMintAmountBLT(
         address _underlyingToken,
@@ -89,28 +90,28 @@ interface IRouter {
     ) external view returns (uint256 wBLTAmount);
 
     function swapExactTokensForTokens(
-        uint amountIn,
-        uint amountOutMin,
-        route[] calldata routes,
+        uint256 amountIn,
+        uint256 amountOutMin,
+        Route[] calldata routes,
         address to,
-        uint deadline
-    ) external returns (uint[] memory amounts);
+        uint256 deadline
+    ) external returns (uint256[] memory amounts);
 
     function swapExactTokensForTokensSimple(
-        uint amountIn,
-        uint amountOutMin,
+        uint256 amountIn,
+        uint256 amountOutMin,
         address tokenFrom,
         address tokenTo,
         bool stable,
         address to,
-        uint deadline
-    ) external returns (uint[] memory amounts);
+        uint256 deadline
+    ) external returns (uint256[] memory amounts);
 }
 
 /**
  * @title wBLT Exercise Helper
  * @notice This contract easily converts oTokens that are paired with wBLT
- *  (such as BMX) to WETH, underlying, or underlying-wBLT LP token using flash loans.
+ *  (such as oBMX) to WETH, underlying, or underlying-wBLT LP token using flash loans.
  */
 
 contract wBLTExerciseHelper is Ownable2Step {
@@ -137,6 +138,9 @@ contract wBLTExerciseHelper is Ownable2Step {
     /// @notice Check whether we are in the middle of a flashloan (used for callback)
     bool public flashEntered;
 
+    /// @notice Used to track the deployed version of this contract.
+    string public constant apiVersion = "0.2.0";
+
     /// @notice Where we send our 0.25% fee
     address public feeAddress = 0x58761D6C6bF6c4bab96CaE125a2e5c8B1859b48a;
 
@@ -146,21 +150,21 @@ contract wBLTExerciseHelper is Ownable2Step {
     uint256 internal constant DISCOUNT_DENOMINATOR = 100;
 
     /// @notice Route for selling wBLT -> WETH
-    IRouter.route[] internal wBltToWeth;
+    IRouter.Route[] internal wBltToWeth;
 
     /// @notice Route for selling WETH -> wBLT
-    IRouter.route[] internal wethToWblt;
+    IRouter.Route[] internal wethToWblt;
 
     constructor(
-        IRouter.route[] memory _wBltToWeth,
-        IRouter.route[] memory _wethToWblt
+        IRouter.Route[] memory _wBltToWeth,
+        IRouter.Route[] memory _wethToWblt
     ) {
         // create our swap routes
-        for (uint i; i < _wBltToWeth.length; ++i) {
+        for (uint256 i; i < _wBltToWeth.length; ++i) {
             wBltToWeth.push(_wBltToWeth[i]);
         }
 
-        for (uint i; i < _wethToWblt.length; ++i) {
+        for (uint256 i; i < _wethToWblt.length; ++i) {
             wethToWblt.push(_wethToWblt[i]);
         }
 
@@ -214,13 +218,13 @@ contract wBLTExerciseHelper is Ownable2Step {
         // we need this much WETH to mint that much wBLT
         wethNeeded = router.quoteMintAmountBLT(address(weth), wBLTNeeded);
 
-        IRouter.route[] memory tokenToWeth = new IRouter.route[](2);
-        tokenToWeth[0] = IRouter.route(
+        IRouter.Route[] memory tokenToWeth = new IRouter.Route[](2);
+        tokenToWeth[0] = IRouter.Route(
             IoToken(_oToken).underlyingToken(),
             address(wBLT),
             false
         );
-        tokenToWeth[1] = IRouter.route(address(wBLT), address(weth), false);
+        tokenToWeth[1] = IRouter.Route(address(wBLT), address(weth), false);
 
         // compare our WETH needed to spot price
         uint256[] memory amounts = router.getAmountsOut(
@@ -305,13 +309,13 @@ contract wBLTExerciseHelper is Ownable2Step {
         wethNeeded = router.quoteMintAmountBLT(address(weth), wBLTNeeded);
 
         // create our route for swapping underlying -> WETH
-        IRouter.route[] memory swapRoute = new IRouter.route[](2);
-        swapRoute[0] = IRouter.route(
+        IRouter.Route[] memory swapRoute = new IRouter.Route[](2);
+        swapRoute[0] = IRouter.Route(
             IoToken(_oToken).underlyingToken(),
             address(wBLT),
             false
         );
-        swapRoute[1] = IRouter.route(address(wBLT), address(weth), false);
+        swapRoute[1] = IRouter.Route(address(wBLT), address(weth), false);
 
         // simulate swapping all to WETH to better estimate total WETH needed
         uint256[] memory amounts = router.getAmountsOut(
@@ -332,8 +336,14 @@ contract wBLTExerciseHelper is Ownable2Step {
         amounts = getAmountsIn(minAmount, underlyingTowBLT);
         minAmount = amounts[0];
 
+        // make sure exercising is profitable
+        if (minAmount > _optionTokenAmount) {
+            revert("Cost exceeds profit");
+        } else {
+            realProfit = _optionTokenAmount - minAmount;
+        }
+
         // calculate our real and expected profit
-        realProfit = _optionTokenAmount - minAmount;
         expectedProfit =
             (_optionTokenAmount *
                 ((MAX_BPS *
@@ -499,7 +509,7 @@ contract wBLTExerciseHelper is Ownable2Step {
 
         // revert if slippage is too high
         if (!withinSlippageTolerance) {
-            revert("Profit not within slippage tolerance, check TWAP");
+            revert("Profit slippage higher than allowed");
         }
 
         // convert tokens to underlying vs WETH as it should be lower fee overall
@@ -515,9 +525,9 @@ contract wBLTExerciseHelper is Ownable2Step {
         //  enough for it to be negligible, and true slippage (🥪) protection isn't
         //  possible without an external price oracle
 
-        // convert any leftover WETH or underlying to wBLT before exercising
+        // convert any significant leftover WETH or underlying to wBLT before exercising
         uint256 wethBalance = weth.balanceOf(address(this));
-        if (wethBalance > 0) {
+        if (wethBalance > 1e14) {
             // swap WETH for wBLT
             router.swapExactTokensForTokens(
                 wethBalance,
@@ -530,7 +540,7 @@ contract wBLTExerciseHelper is Ownable2Step {
 
         IERC20 underlying = IERC20(IoToken(_oToken).underlyingToken());
         uint256 underlyingBalance = underlying.balanceOf(address(this));
-        if (underlyingBalance > 0) {
+        if (underlyingBalance > 1e17) {
             // swap underlying to wBLT
             bvmRouter.swapExactTokensForTokensSimple(
                 underlyingBalance,
@@ -681,17 +691,15 @@ contract wBLTExerciseHelper is Ownable2Step {
                 );
             }
 
-            // send underlying to user
-            uint256 underlyingBalance = underlying.balanceOf(address(this));
-            if (underlyingBalance > 0) {
-                _safeTransfer(
-                    address(underlying),
-                    msg.sender,
-                    underlyingBalance
-                );
-            }
+            // send underlying to user, no realistic way this is 0 so skip an if check
+            _safeTransfer(
+                address(underlying),
+                msg.sender,
+                underlying.balanceOf(address(this))
+            );
         } else {
-            // convert any significant remaining wBLT to WETH
+            // convert any significant remaining wBLT to WETH. also, swapping too
+            //  small of an amount might revert here
             if (wBLTBalance > 1e17) {
                 router.swapExactTokensForTokens(
                     wBLTBalance,
@@ -835,13 +843,13 @@ contract wBLTExerciseHelper is Ownable2Step {
         IERC20 underlying = IERC20(IoToken(_oToken).underlyingToken());
         uint256 underlyingReceived = underlying.balanceOf(address(this));
 
-        IRouter.route[] memory underlyingToWeth = new IRouter.route[](2);
-        underlyingToWeth[0] = IRouter.route(
+        IRouter.Route[] memory underlyingToWeth = new IRouter.Route[](2);
+        underlyingToWeth[0] = IRouter.Route(
             address(underlying),
             address(wBLT),
             false
         );
-        underlyingToWeth[1] = IRouter.route(
+        underlyingToWeth[1] = IRouter.Route(
             address(wBLT),
             address(weth),
             false
@@ -933,8 +941,7 @@ contract wBLTExerciseHelper is Ownable2Step {
     }
 
     /**
-     * @notice
-     *  Update fee for oToken -> WETH conversion.
+     * @notice Update fee for oToken -> WETH conversion.
      * @param _recipient Fee recipient address.
      * @param _newFee New fee, out of 10,000.
      */
@@ -952,50 +959,50 @@ contract wBLTExerciseHelper is Ownable2Step {
      * @notice Given an output amount of an asset and pair reserves, returns a required
      *  input amount of the other asset.
      * @dev Assumes 0.3% fee.
-     * @param amountOut Minimum amount we need to receive of reserveOut token.
-     * @param reserveIn Pair reserve of our amountIn token.
-     * @param reserveOut Pair reserve of our amountOut token.
-     * @return amountIn Amount of reserveIn to swap to receive amountOut.
+     * @param _amountOut Minimum amount we need to receive of _reserveOut token.
+     * @param _reserveIn Pair reserve of our amountIn token.
+     * @param _reserveOut Pair reserve of our _amountOut token.
+     * @return amountIn Amount of _reserveIn to swap to receive _amountOut.
      */
-    function getAmountIn(
-        uint amountOut,
-        uint reserveIn,
-        uint reserveOut
-    ) internal pure returns (uint amountIn) {
-        if (amountOut == 0) {
-            revert("getAmountIn: amountOut must be >0");
+    function _getAmountIn(
+        uint256 _amountOut,
+        uint256 _reserveIn,
+        uint256 _reserveOut
+    ) internal pure returns (uint256 amountIn) {
+        if (_amountOut == 0) {
+            revert("_getAmountIn: _amountOut must be >0");
         }
-        if (reserveIn == 0 || reserveOut == 0) {
-            revert("getAmountIn: Reserves must be >0");
+        if (_reserveIn == 0 || _reserveOut == 0) {
+            revert("_getAmountIn: Reserves must be >0");
         }
-        uint numerator = reserveIn * amountOut * 1000;
-        uint denominator = (reserveOut - amountOut) * 997;
+        uint256 numerator = _reserveIn * _amountOut * 1000;
+        uint256 denominator = (_reserveOut - _amountOut) * 997;
         amountIn = (numerator / denominator) + 1;
     }
 
     /**
-     * @notice Performs chained getAmountIn calculations on any number of pairs.
+     * @notice Performs chained _getAmountIn calculations on any number of pairs.
      * @dev Assumes only volatile pools.
-     * @param amountOut Minimum amount we need to receive of the final array token.
-     * @param path Array of addresses for our swap path, UniV2-style.
+     * @param _amountOut Minimum amount we need to receive of the final array token.
+     * @param _path Array of addresses for our swap path, UniV2-style.
      * @return amounts Array of amounts for each token in our swap path.
      */
     function getAmountsIn(
-        uint amountOut,
-        address[] memory path
-    ) public view returns (uint[] memory amounts) {
-        if (path.length < 2) {
+        uint256 _amountOut,
+        address[] memory _path
+    ) public view returns (uint256[] memory amounts) {
+        if (_path.length < 2) {
             revert("getAmountsIn: Path length must be >1");
         }
-        amounts = new uint[](path.length);
-        amounts[amounts.length - 1] = amountOut;
-        for (uint i = path.length - 1; i > 0; i--) {
-            (uint reserveIn, uint reserveOut) = bvmRouter.getReserves(
-                path[i - 1],
-                path[i],
+        amounts = new uint256[](_path.length);
+        amounts[amounts.length - 1] = _amountOut;
+        for (uint256 i = _path.length - 1; i > 0; i--) {
+            (uint256 reserveIn, uint256 reserveOut) = bvmRouter.getReserves(
+                _path[i - 1],
+                _path[i],
                 false
             );
-            amounts[i - 1] = getAmountIn(amounts[i], reserveIn, reserveOut);
+            amounts[i - 1] = _getAmountIn(amounts[i], reserveIn, reserveOut);
         }
     }
 
@@ -1021,14 +1028,18 @@ contract wBLTExerciseHelper is Ownable2Step {
 
     /**
      * @notice Internal safeTransfer function. Transfer tokens to another address.
-     * @param token Address of token to transfer.
-     * @param to Address to send token to.
-     * @param value Amount of token to send.
+     * @param _token Address of token to transfer.
+     * @param _to Address to send token to.
+     * @param _value Amount of token to send.
      */
-    function _safeTransfer(address token, address to, uint256 value) internal {
-        require(token.code.length > 0);
-        (bool success, bytes memory data) = token.call(
-            abi.encodeWithSelector(IERC20.transfer.selector, to, value)
+    function _safeTransfer(
+        address _token,
+        address _to,
+        uint256 _value
+    ) internal {
+        require(_token.code.length > 0);
+        (bool success, bytes memory data) = _token.call(
+            abi.encodeWithSelector(IERC20.transfer.selector, _to, _value)
         );
         require(success && (data.length == 0 || abi.decode(data, (bool))));
     }
@@ -1037,24 +1048,24 @@ contract wBLTExerciseHelper is Ownable2Step {
      * @notice Internal safeTransferFrom function. Transfer tokens from one address to
      *  another.
      * @dev From address must have approved sufficient allowance for this contract.
-     * @param token Address of token to transfer.
-     * @param to Address to send token from.
-     * @param to Address to send token to.
-     * @param value Amount of token to send.
+     * @param _token Address of token to transfer.
+     * @param _from Address to send token from.
+     * @param _to Address to send token to.
+     * @param _value Amount of token to send.
      */
     function _safeTransferFrom(
-        address token,
-        address from,
-        address to,
-        uint256 value
+        address _token,
+        address _from,
+        address _to,
+        uint256 _value
     ) internal {
-        require(token.code.length > 0);
-        (bool success, bytes memory data) = token.call(
+        require(_token.code.length > 0);
+        (bool success, bytes memory data) = _token.call(
             abi.encodeWithSelector(
                 IERC20.transferFrom.selector,
-                from,
-                to,
-                value
+                _from,
+                _to,
+                _value
             )
         );
         require(success && (data.length == 0 || abi.decode(data, (bool))));
