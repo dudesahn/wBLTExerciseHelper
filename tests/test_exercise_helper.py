@@ -2,9 +2,8 @@ import brownie
 from brownie import config, Contract, ZERO_ADDRESS, chain, interface, accounts
 import pytest
 
-
-# the most effective way to test a situation where we have enough leftover WETH & wBLT to
-#  swap is to decrease the value on lines 668 and 682 to 0
+# see the tracking.txt file for more info about adjusting cutoffs to better test different
+#  branches of the two functions for exercising
 def test_bmx_exercise_helper(
     obmx,
     bmx,
@@ -40,7 +39,7 @@ def test_bmx_exercise_helper(
 
     # control how much we exercise. larger size, more slippage
     to_exercise = 1_000e18
-    profit_slippage = 2000  # in BPS
+    profit_slippage = 9500  # in BPS
     swap_slippage = 100
 
     obmx.approve(bmx_exercise_helper, 2**256 - 1, {"from": obmx_whale})
@@ -120,8 +119,6 @@ def test_bmx_exercise_helper(
     )
 
 
-# the most effective way to test a situation where we have "dust" WETH is to increase
-#  the value on line 568 to 1e19 and 582 to 1e22
 # note that this test MUST be run with something other than ganache
 def test_bmx_exercise_helper_lp(
     obmx,
@@ -165,9 +162,9 @@ def test_bmx_exercise_helper_lp(
 
     # control how much we exercise. larger size, more slippage
     to_exercise = 1_500e18
-    profit_slippage = 1500  # in BPS
+    profit_slippage = 9500  # in BPS
     swap_slippage = 100
-    percent_to_lp = 650
+    percent_to_lp = 100
     discount = 35
 
     # to_exercise = 500e18. percent_to_lp =  500 = 0.21367%, 701 = , 751 = 0.20803%, 755 = 0.20794%
@@ -251,14 +248,13 @@ def test_bmx_exercise_helper_lp_weird(
 
     # control how much we exercise. larger size, more slippage
     to_exercise = 1_000e18
-    profit_slippage = 1500  # in BPS
+    profit_slippage = 9500  # in BPS
     swap_slippage = 100
-    percent_to_lp = 650
+    percent_to_lp = 100
     discount = 35
     to_lp = int(1_000e18 * percent_to_lp / 10_000)
 
     obmx.approve(bmx_exercise_helper, 2**256 - 1, {"from": obmx_whale})
-    fee_before = weth.balanceOf("0x58761D6C6bF6c4bab96CaE125a2e5c8B1859b48a")
 
     # first check exercising our LP
     output = bmx_exercise_helper.quoteExerciseLp(

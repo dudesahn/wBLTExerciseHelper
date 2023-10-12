@@ -131,7 +131,7 @@ contract wBLTExerciseHelper is Ownable2Step {
     IRouter internal constant router =
         IRouter(0x70FfF9B84788566065f1dFD8968Fb72F798b9aE5);
 
-    /// @notice BVM router for quoteAddLiquidity
+    /// @notice BVM standard router, used for a few functions missing from BMX router
     IRouter internal constant bvmRouter =
         IRouter(0xE11b93B61f6291d35c5a2beA0A9fF169080160cF);
 
@@ -527,7 +527,7 @@ contract wBLTExerciseHelper is Ownable2Step {
 
         // convert any significant leftover WETH or underlying to wBLT before exercising
         uint256 wethBalance = weth.balanceOf(address(this));
-        if (wethBalance > 1e14) {
+        if (wethBalance > 1e12) {
             // swap WETH for wBLT
             router.swapExactTokensForTokens(
                 wethBalance,
@@ -536,11 +536,13 @@ contract wBLTExerciseHelper is Ownable2Step {
                 address(this),
                 block.timestamp
             );
+            // update our balance
+            wethBalance = weth.balanceOf(address(this));
         }
 
         IERC20 underlying = IERC20(IoToken(_oToken).underlyingToken());
         uint256 underlyingBalance = underlying.balanceOf(address(this));
-        if (underlyingBalance > 1e17) {
+        if (underlyingBalance > 1e15) {
             // swap underlying to wBLT
             bvmRouter.swapExactTokensForTokensSimple(
                 underlyingBalance,
@@ -551,6 +553,8 @@ contract wBLTExerciseHelper is Ownable2Step {
                 address(this),
                 block.timestamp
             );
+            // update our balance
+            underlyingBalance = underlying.balanceOf(address(this));
         }
 
         // exercise our remaining oTokens and lock LP with msg.sender as recipient
@@ -563,35 +567,7 @@ contract wBLTExerciseHelper is Ownable2Step {
             block.timestamp
         );
 
-        // convert any significant remaining WETH to wBLT
-        wethBalance = weth.balanceOf(address(this));
-        if (wethBalance > 1e14) {
-            // swap, update wethBalance
-            router.swapExactTokensForTokens(
-                wethBalance,
-                0,
-                wethToWblt,
-                address(this),
-                block.timestamp
-            );
-            wethBalance = weth.balanceOf(address(this));
-        }
-
-        // convert any significant remaining underlying to wBLT
-        underlyingBalance = underlying.balanceOf(address(this));
-        if (underlyingBalance > 1e17) {
-            bvmRouter.swapExactTokensForTokensSimple(
-                underlyingBalance,
-                0,
-                address(underlying),
-                address(wBLT),
-                false,
-                address(this),
-                block.timestamp
-            );
-            underlyingBalance = underlying.balanceOf(address(this));
-        }
-
+        // update our wBLT balance after exercising
         uint256 wBLTBalance = wBLT.balanceOf(address(this));
 
         if (wBLTBalance > 0) {
@@ -665,7 +641,7 @@ contract wBLTExerciseHelper is Ownable2Step {
             IERC20 underlying = IERC20(IoToken(_oToken).underlyingToken());
 
             // swap any leftover WETH to wBLT, unless dust, then send back as WETH
-            if (wethBalance > 1e14) {
+            if (wethBalance > 1e12) {
                 // swap WETH to wBLT, then batch-swap all wBLT to underlying
                 router.swapExactTokensForTokens(
                     wethBalance,
@@ -679,7 +655,7 @@ contract wBLTExerciseHelper is Ownable2Step {
             }
 
             // convert any significant remaining wBLT to underlying
-            if (wBLTBalance > 1e17) {
+            if (wBLTBalance > 1e15) {
                 bvmRouter.swapExactTokensForTokensSimple(
                     wBLTBalance,
                     0,
@@ -699,8 +675,8 @@ contract wBLTExerciseHelper is Ownable2Step {
             );
         } else {
             // convert any significant remaining wBLT to WETH. also, swapping too
-            //  small of an amount might revert here
-            if (wBLTBalance > 1e17) {
+            //  small of an amount will revert here
+            if (wBLTBalance > 1e15) {
                 router.swapExactTokensForTokens(
                     wBLTBalance,
                     0,
