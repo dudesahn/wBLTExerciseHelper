@@ -1,5 +1,6 @@
 # use Ganache's forked mainnet mode as the default network (mainnet-fork)
 # NOTE: You don't *have* to do this, but it is often helpful for testing
+# for this repo, we use both base-dev-fork and base-anvil-fork
 networks:
   default: base-anvil-fork
 
@@ -17,7 +18,7 @@ compiler:
     version:
     remappings:
       - "@yearnvaults=yearn/yearn-vaults@0.4.6"
-      - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@4.9.3"
+      - "@openzeppelin/contracts@4.9.3=OpenZeppelin/openzeppelin-contracts@4.9.3/contracts"
 
 reports:
   exclude_contracts:
