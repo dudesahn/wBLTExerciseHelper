@@ -1,6 +1,4 @@
-# README
-
-## wBLT Exercise Helper
+# wBLT Exercise Helper
 
 - This contract simplifies the process of redeeming oTokens (such as oBMX) paired with wBLT for WETH, underlying,
   or for the wBLT-underlying LP.
@@ -10,7 +8,7 @@
   both internally and externally for estimations of output and optimal inputs.
 - A 0.25% fee is sent to `feeAddress` on each exercise. Fee is adjustable between 0-1%.
 
-### Testing
+## Testing
 
 To run the test suite:
 
