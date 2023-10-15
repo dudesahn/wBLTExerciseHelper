@@ -24,7 +24,7 @@ def tests_using_tenderly():
 
 # useful because it doesn't crash when sometimes ganache does, "works" in coverage testing but then doesn't actually write any data lol
 # if we're using anvil, make sure to use the correct network (base-anvil-fork vs base-dev-fork)
-use_anvil = True
+use_anvil = False
 
 
 @pytest.fixture(scope="session")
