@@ -43,6 +43,16 @@ interface IBalancer {
     ) external;
 }
 
+interface IPairFactory {
+    function getFee(address pair) external view returns (uint256);
+
+    function getPair(
+        address tokenA,
+        address tokenB,
+        bool stable
+    ) external view returns (address);
+}
+
 interface IRouter {
     struct Route {
         address from;
@@ -129,11 +139,15 @@ contract wBLTExerciseHelper is Ownable2Step {
 
     /// @notice BMX router for swaps
     IRouter internal constant router =
-        IRouter(0x70FfF9B84788566065f1dFD8968Fb72F798b9aE5);
+        IRouter(0xf5A008cA68870f223cd76E31248Cd04aF6cb9AF3);
 
     /// @notice BVM standard router, used for a few functions missing from BMX router
     IRouter internal constant bvmRouter =
         IRouter(0xE11b93B61f6291d35c5a2beA0A9fF169080160cF);
+
+    /// @notice Pair factory, use this to check the current swap fee on a given pool
+    IPairFactory internal constant pairFactory =
+        IPairFactory(0xe21Aac7F113Bd5DC2389e4d8a8db854a87fD6951);
 
     /// @notice Check whether we are in the middle of a flashloan (used for callback)
     bool public flashEntered;
@@ -155,18 +169,10 @@ contract wBLTExerciseHelper is Ownable2Step {
     /// @notice Route for selling WETH -> wBLT
     IRouter.Route[] internal wethToWblt;
 
-    constructor(
-        IRouter.Route[] memory _wBltToWeth,
-        IRouter.Route[] memory _wethToWblt
-    ) {
-        // create our swap routes
-        for (uint256 i; i < _wBltToWeth.length; ++i) {
-            wBltToWeth.push(_wBltToWeth[i]);
-        }
-
-        for (uint256 i; i < _wethToWblt.length; ++i) {
-            wethToWblt.push(_wethToWblt[i]);
-        }
+    constructor() {
+        // setup our routes
+        wBltToWeth.push(IRouter.Route(address(wBLT), address(weth), false));
+        wethToWblt.push(IRouter.Route(address(weth), address(wBLT), false));
 
         // do necessary approvals
         weth.approve(address(router), type(uint256).max);
@@ -725,7 +731,6 @@ contract wBLTExerciseHelper is Ownable2Step {
         bytes memory userData = abi.encode(
             _oToken,
             _oTokenToExercise,
-            _wethNeeded,
             _receiveUnderlying,
             _slippageAllowed
         );
@@ -761,21 +766,22 @@ contract wBLTExerciseHelper is Ownable2Step {
         (
             address _oToken,
             uint256 _oTokenToExercise,
-            uint256 _wethToExercise,
             bool _receiveUnderlying,
             uint256 _slippageAllowed
-        ) = abi.decode(_userData, (address, uint256, uint256, bool, uint256));
+        ) = abi.decode(_userData, (address, uint256, bool, uint256));
+
+        // pass our total WETH amount to make sure we get enough back
+        uint256 payback = _amounts[0] + _feeAmounts[0];
 
         _exerciseAndSwap(
             _oToken,
             _oTokenToExercise,
-            _wethToExercise,
+            payback,
             _receiveUnderlying,
             _slippageAllowed
         );
 
         // repay our flash loan
-        uint256 payback = _amounts[0] + _feeAmounts[0];
         _safeTransfer(address(weth), address(balancerVault), payback);
         flashEntered = false;
     }
@@ -784,8 +790,8 @@ contract wBLTExerciseHelper is Ownable2Step {
      * @notice Exercise our oToken, then swap some (or all) underlying to WETH.
      * @param _oToken The option token we are exercising.
      * @param _optionTokenAmount Amount of oToken to exercise.
-     * @param _wethAmount Amount of WETH needed to pay for exercising. Must
-     *  first be converted to wBLT.
+     * @param _wethAmount Max amount of WETH we allow to be spent exercising, and how much
+     *  we'll need back. Note this also includes any fees for flash loans.
      * @param _receiveUnderlying Whether the user wants to receive WETH or underlying.
      * @param _slippageAllowed Slippage (really price impact) we allow while exercising.
      */
@@ -869,11 +875,16 @@ contract wBLTExerciseHelper is Ownable2Step {
             // swap our underlying amount calculated above
             router.swapExactTokensForTokens(
                 underlyingToSwap,
-                minAmountOut,
+                0,
                 underlyingToWeth,
                 address(this),
                 block.timestamp
             );
+
+            // easier to enforce the minAmountOut after the swap due to rounding issues
+            if (weth.balanceOf(address(this)) < minAmountOut) {
+                revert("Not enough WETH out");
+            }
 
             // take fees
             _takeFees(totalWeth);
@@ -934,25 +945,28 @@ contract wBLTExerciseHelper is Ownable2Step {
     /**
      * @notice Given an output amount of an asset and pair reserves, returns a required
      *  input amount of the other asset.
-     * @dev Assumes 0.3% fee.
+     * @dev Pulls the fee correction dynamically from our pair factory.
+     * @param _pair Address of the token pair we are checking on.
      * @param _amountOut Minimum amount we need to receive of _reserveOut token.
      * @param _reserveIn Pair reserve of our amountIn token.
      * @param _reserveOut Pair reserve of our _amountOut token.
      * @return amountIn Amount of _reserveIn to swap to receive _amountOut.
      */
     function _getAmountIn(
+        address _pair,
         uint256 _amountOut,
         uint256 _reserveIn,
         uint256 _reserveOut
-    ) internal pure returns (uint256 amountIn) {
+    ) internal view returns (uint256 amountIn) {
         if (_amountOut == 0) {
             revert("_getAmountIn: _amountOut must be >0");
         }
         if (_reserveIn == 0 || _reserveOut == 0) {
             revert("_getAmountIn: Reserves must be >0");
         }
-        uint256 numerator = _reserveIn * _amountOut * 1000;
-        uint256 denominator = (_reserveOut - _amountOut) * 997;
+        uint256 numerator = _reserveIn * _amountOut * 10_000;
+        uint256 denominator = (_reserveOut - _amountOut) *
+            (10_000 - pairFactory.getFee(_pair));
         amountIn = (numerator / denominator) + 1;
     }
 
@@ -978,7 +992,13 @@ contract wBLTExerciseHelper is Ownable2Step {
                 _path[i],
                 false
             );
-            amounts[i - 1] = _getAmountIn(amounts[i], reserveIn, reserveOut);
+            address pair = pairFactory.getPair(_path[i - 1], _path[i], false);
+            amounts[i - 1] = _getAmountIn(
+                pair,
+                amounts[i],
+                reserveIn,
+                reserveOut
+            );
         }
     }
 

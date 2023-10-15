@@ -16,6 +16,7 @@ def test_bmx_exercise_helper(
     buy_underlying,
     w_blt_whale,
     bvm_router,
+    router,
 ):
     # exercise a small amount
     obmx_before = obmx.balanceOf(obmx_whale)
@@ -56,6 +57,26 @@ def test_bmx_exercise_helper(
         "expectedProfit"
     ]
     print("Slippage (manually calculated):", "{:,.2f}%".format(real_slippage * 100))
+
+    # estimate some of our internal checks get before we do the actual swap
+    example_weth = 284593419094404770
+    wblt_needed = router.quoteRedeemAmountBLT(weth.address, 284593419094404770, True)
+    bmx_needed = bmx_exercise_helper.getAmountsIn(
+        wblt_needed,
+        [
+            "0x548f93779fbc992010c07467cbaf329dd5f059b7",
+            "0x4e74d4db6c0726ccded4656d0bce448876bb4c7a",
+        ],
+    )
+    print(
+        "Test getAmountsOut:",
+        "\nBMX:",
+        bmx_needed[0],
+        "\nwBLT:",
+        wblt_needed,
+        "\nExample WETH amount:",
+        example_weth,
+    )
 
     bmx_exercise_helper.exercise(
         obmx,

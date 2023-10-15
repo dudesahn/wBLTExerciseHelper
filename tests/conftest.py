@@ -103,7 +103,7 @@ def buy_underlying(request):
 
 @pytest.fixture(scope="session")
 def router():
-    router = Contract("0x70FfF9B84788566065f1dFD8968Fb72F798b9aE5")  # v22, testing
+    router = Contract("0x22Fd6123392E729D5116E3b2a1FDF46298D26b2D")  # v25, testing
     yield router
 
 
@@ -178,6 +178,9 @@ def weth_route(w_blt, weth):
 
 # our dump helper
 @pytest.fixture(scope="function")
-def bmx_exercise_helper(wBLTExerciseHelper, screamsh, router, wblt_route, weth_route):
-    bmx_exercise_helper = screamsh.deploy(wBLTExerciseHelper, wblt_route, weth_route)
+def bmx_exercise_helper(wBLTExerciseHelper, screamsh, router):
+    bmx_exercise_helper = screamsh.deploy(wBLTExerciseHelper)
+    #     bmx_exercise_helper = Contract(
+    #         "0x021Ecb50c4f2de23d4a1E1492b7362094a94EC79"
+    #     )  # using v22 router
     yield bmx_exercise_helper
